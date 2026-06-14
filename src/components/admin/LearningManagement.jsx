@@ -81,9 +81,9 @@ export default function LearningManagement({
         const data =
           await response.json();
 
-        alert(
-          data.message
-        );
+        // alert(
+        //   data.message
+        // );
       } catch (error) {
         console.log(error);
       }

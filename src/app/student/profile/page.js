@@ -78,9 +78,9 @@ export default function ProfilePage() {
         const data =
           await response.json();
 
-        alert(
-          data.message
-        );
+        // alert(
+        //   data.message
+        // );
       } catch (
         error
       ) {

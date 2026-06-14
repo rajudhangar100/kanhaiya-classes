@@ -125,9 +125,9 @@ export default function StudentExams({
       const data =
         await response.json();
 
-      alert(
-        data.message
-      );
+      // alert(
+      //   data.message
+      // );
 
       if (
         data.success

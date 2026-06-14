@@ -149,9 +149,9 @@ export default function AttendanceManagement() {
           true
         );
 
-        alert(
-          data.message
-        );
+        // alert(
+        //   data.message
+        // );
 
         return;
       }

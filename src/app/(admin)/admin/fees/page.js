@@ -150,9 +150,9 @@ export default function FeesPage() {
           return;
         }
 
-        alert(
-          data.message
-        );
+        // alert(
+        //   data.message
+        // );
       } catch (
         error
       ) {

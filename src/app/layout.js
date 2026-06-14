@@ -17,6 +17,9 @@ export const metadata = {
   title: "Kanhaiya Classes",
   description:
     "Empowering students from 1st to 12th with quality education and progress tracking.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {

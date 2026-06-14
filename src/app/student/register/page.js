@@ -1,13 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { UserPlus } from "lucide-react";
 
 export default function Register() {
+  const router = useRouter();
+
   const [loading, setLoading] =
     useState(false);
 
-  const [success, setSuccess] =
-    useState("");
+  const [message, setMessage] =
+    useState({
+      type: "",
+      text: "",
+    });
 
   const [formData, setFormData] =
     useState({
@@ -22,16 +29,76 @@ export default function Register() {
     });
 
   const handleChange = (e) => {
+    const {
+      name,
+      value,
+    } = e.target;
+
+    // allow only digits for phone numbers
+    if (
+      name ===
+        "mobileNumber" ||
+      name ===
+        "parentMobileNumber"
+    ) {
+      const cleaned =
+        value
+          .replace(/\D/g, "")
+          .slice(0, 10);
+
+      setFormData({
+        ...formData,
+        [name]: cleaned,
+      });
+
+      return;
+    }
+
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [name]: value,
     });
   };
 
   const handleSubmit =
     async (e) => {
       e.preventDefault();
+
+      setMessage({
+        type: "",
+        text: "",
+      });
+
+      // validate student mobile
+      if (
+        !/^\d{10}$/.test(
+          formData.mobileNumber
+        )
+      ) {
+        setMessage({
+          type: "error",
+          text:
+            "Student mobile number must be exactly 10 digits.",
+        });
+
+        return;
+      }
+
+      // validate parent mobile (optional)
+      if (
+        formData.parentMobileNumber &&
+        !/^\d{10}$/.test(
+          formData.parentMobileNumber
+        )
+      ) {
+        setMessage({
+          type: "error",
+          text:
+            "Parent mobile number must be exactly 10 digits.",
+        });
+
+        return;
+      }
 
       setLoading(true);
 
@@ -40,41 +107,92 @@ export default function Register() {
           await fetch(
             "/api/students/register",
             {
-              method: "POST",
+              method:
+                "POST",
               headers: {
                 "Content-Type":
                   "application/json",
               },
-              body: JSON.stringify(
-                formData
-              ),
+              body:
+                JSON.stringify(
+                  formData
+                ),
             }
           );
-          if (!response.ok) {
-              throw new Error(
-                "Failed request"
-              );
-            }
 
         const data =
           await response.json();
 
-        if (data.success) {
-          alert(
-            "Registration successful.\nPlease wait for admin approval before login."
-          );
-          setSuccess(
-            "Registration submitted. Wait for admin approval."
-          );
-          router.push(
-            "/student/login"
+        if (
+          !response.ok
+        ) {
+          throw new Error(
+            data.message ||
+              "Registration failed"
           );
         }
-      } catch (error) {
-        console.log(error);
-      }
 
-      setLoading(false);
+        if (
+          data.success
+        ) {
+          setMessage({
+            type:
+              "success",
+            text:
+              "Registration submitted successfully. Wait for admin approval.",
+          });
+
+          // reset form
+          setFormData({
+            fullName:
+              "",
+            mobileNumber:
+              "",
+            parentMobileNumber:
+              "",
+            standard:
+              "",
+            schoolName:
+              "",
+            gender:
+              "",
+            address:
+              "",
+          });
+
+          // redirect after 2 sec
+          setTimeout(
+            () => {
+              router.replace(
+                "/student/login"
+              );
+            },
+            2000
+          );
+        } else {
+          setMessage({
+            type:
+              "error",
+            text:
+              data.message ||
+              "Registration failed.",
+          });
+        }
+      } catch (error) {
+        console.error(
+          "Registration Error:",
+          error
+        );
+
+        setMessage({
+          type: "error",
+          text:
+            error.message ||
+            "Something went wrong. Please try again.",
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
   return (
@@ -82,9 +200,22 @@ export default function Register() {
 
       <div className="max-w-2xl mx-auto bg-white rounded-[40px] p-8 shadow-xl">
 
-        <h1 className="heading-font text-4xl font-bold text-center text-[#163232]">
-          Student Registration
-        </h1>
+        {/* Title with icon */}
+        <div className="flex items-center justify-center gap-3">
+
+          <UserPlus
+            size={36}
+            className="text-[#2CB5A0]"
+          />
+
+          <h1 className="heading-font text-4xl font-bold text-[#163232]">
+            Student Registration
+          </h1>
+        </div>
+
+        <p className="text-center text-gray-500 mt-2">
+          Register to access student portal
+        </p>
 
         <form
           onSubmit={
@@ -92,44 +223,63 @@ export default function Register() {
           }
           className="mt-8 grid gap-5"
         >
+
+          {/* Full Name */}
           <input
             type="text"
             name="fullName"
             placeholder="Full Name"
+            value={
+              formData.fullName
+            }
             onChange={
               handleChange
             }
-            className="border rounded-2xl p-4"
+            className="border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-[#2CB5A0]"
             required
           />
 
+          {/* Student Mobile */}
           <input
-            type="text"
+            type="tel"
             name="mobileNumber"
             placeholder="Mobile Number"
+            value={
+              formData.mobileNumber
+            }
             onChange={
               handleChange
             }
-            className="border rounded-2xl p-4"
+            className="border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-[#2CB5A0]"
+            maxLength={10}
             required
           />
 
+          {/* Parent Mobile */}
           <input
-            type="text"
+            type="tel"
             name="parentMobileNumber"
             placeholder="Parent Mobile Number"
+            value={
+              formData.parentMobileNumber
+            }
             onChange={
               handleChange
             }
-            className="border rounded-2xl p-4"
+            className="border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-[#2CB5A0]"
+            maxLength={10}
           />
 
+          {/* Standard */}
           <select
             name="standard"
+            value={
+              formData.standard
+            }
             onChange={
               handleChange
             }
-            className="border rounded-2xl p-4"
+            className="border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-[#2CB5A0]"
             required
           >
             <option value="">
@@ -144,28 +294,37 @@ export default function Register() {
                     i + 1
                   }
                 >
+                  Class{" "}
                   {i + 1}
                 </option>
               )
             )}
           </select>
 
+          {/* School */}
           <input
             type="text"
             name="schoolName"
             placeholder="School Name"
+            value={
+              formData.schoolName
+            }
             onChange={
               handleChange
             }
-            className="border rounded-2xl p-4"
+            className="border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-[#2CB5A0]"
           />
 
+          {/* Gender */}
           <select
             name="gender"
+            value={
+              formData.gender
+            }
             onChange={
               handleChange
             }
-            className="border rounded-2xl p-4"
+            className="border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-[#2CB5A0]"
           >
             <option value="">
               Select Gender
@@ -178,30 +337,52 @@ export default function Register() {
             <option value="female">
               Female
             </option>
+
+            <option value="other">
+              Other
+            </option>
           </select>
 
+          {/* Address */}
           <textarea
             name="address"
             placeholder="Address"
+            value={
+              formData.address
+            }
             onChange={
               handleChange
             }
-            className="border rounded-2xl p-4 h-32"
+            className="border rounded-2xl p-4 h-32 outline-none focus:ring-2 focus:ring-[#2CB5A0]"
           />
 
+          {/* Submit */}
           <button
-            disabled={loading}
-            className="bg-linear-to-r from-[#3ED6C1] to-[#2CB5A0] text-white py-4 rounded-2xl font-semibold"
+            type="submit"
+            disabled={
+              loading
+            }
+            className="bg-linear-to-r from-[#3ED6C1] to-[#2CB5A0] text-white py-4 rounded-2xl font-semibold disabled:opacity-70"
           >
             {loading
               ? "Submitting..."
               : "Register"}
           </button>
 
-          {success && (
-            <p className="text-green-600 text-center">
-              {success}
-            </p>
+          {/* Message */}
+          {message.text && (
+            <div
+              className={`text-center rounded-xl py-3 px-4 text-sm font-medium ${
+                message.type ===
+                "success"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {
+                message.text
+              }
+            </div>
           )}
         </form>
       </div>
