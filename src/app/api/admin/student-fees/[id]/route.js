@@ -3,10 +3,14 @@ import Fees from "@/models/Fees";
 
 export async function GET(
   request,
-  { params }
+  context
 ) {
   try {
     await connectDB();
+
+    // Next.js 16 fix
+    const params =
+      await context.params;
 
     const fees =
       await Fees.find({
@@ -21,9 +25,13 @@ export async function GET(
       fees,
     });
   } catch (error) {
+    console.log(error);
+
     return Response.json(
       {
         success: false,
+        error:
+          error.message,
       },
       {
         status: 500,

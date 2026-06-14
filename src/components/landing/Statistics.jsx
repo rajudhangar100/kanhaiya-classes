@@ -5,7 +5,7 @@ import { useInView } from "react-intersection-observer";
 
 const stats = [
   {
-    value: 500,
+    value: 50,
     suffix: "+",
     label: "Students Taught",
   },
@@ -15,12 +15,12 @@ const stats = [
     label: "Success Rate",
   },
   {
-    value: 1200,
+    value: 120,
     suffix: "+",
     label: "Tests Conducted",
   },
   {
-    value: 12,
+    value: 2,
     suffix: "+",
     label: "Years Experience",
   },

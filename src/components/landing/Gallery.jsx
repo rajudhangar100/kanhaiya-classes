@@ -2,12 +2,12 @@ import SectionHeading from "../common/SectionHeading";
 import AnimatedSection from "../common/AnimatedSection";
 
 const images = [
-  "/logo.png",
-  "/logo.png",
-  "/logo.png",
-  "/logo.png",
-  "/logo.png",
-  "/logo.png",
+  "/pic1.png",
+  "/pic5.png",
+  "/pic6.png",
+  "/pic3.png",
+  "/pic4.png",
+  "/pic2.png",
 ];
 
 export default function Gallery() {

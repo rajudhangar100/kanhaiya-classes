@@ -3,20 +3,20 @@ import SectionHeading from "../common/SectionHeading";
 
 const feePlans = [
   {
-    standard: "1st - 5th",
+    standard: "1st - 4th",
+    fee: "₹450",
+  },
+  {
+    standard: "5th - 9th",
+    fee: "₹600 - ₹1200",
+  },
+  {
+    standard: "10th",
     fee: "₹1,500",
   },
   {
-    standard: "6th - 8th",
-    fee: "₹2,000",
-  },
-  {
-    standard: "9th - 10th",
-    fee: "₹2,500",
-  },
-  {
     standard: "11th - 12th Commerce",
-    fee: "₹3,000",
+    fee: "₹1,500",
   },
 ];
 

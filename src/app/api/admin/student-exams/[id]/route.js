@@ -3,10 +3,12 @@ import Exam from "@/models/Exam";
 
 export async function GET(
   request,
-  { params }
+  context
 ) {
   try {
     await connectDB();
+    const params =
+      await context.params;
 
     const exams =
       await Exam.find({

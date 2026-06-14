@@ -3,6 +3,7 @@ from "firebase/app";
 
 import {
   getAuth,
+  connectAuthEmulator,
 } from "firebase/auth";
 
 const firebaseConfig = {

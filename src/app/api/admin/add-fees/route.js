@@ -17,6 +17,7 @@ export async function POST(
       month,
       year,
       amountPaid,
+      forceUpdate,
     } =
       await request.json();
 
@@ -34,26 +35,6 @@ export async function POST(
         },
         {
           status: 404,
-        }
-      );
-    }
-
-    const existingFee =
-      await Fees.findOne({
-        studentId,
-        month,
-        year,
-      });
-
-    if (existingFee) {
-      return Response.json(
-        {
-          success: false,
-          message:
-            "Fees already added for this month",
-        },
-        {
-          status: 400,
         }
       );
     }
@@ -86,6 +67,50 @@ export async function POST(
         "paid";
     }
 
+    const existingFee =
+      await Fees.findOne({
+        studentId,
+        month,
+        year,
+      });
+
+    // Already exists
+    if (
+      existingFee &&
+      !forceUpdate
+    ) {
+      return Response.json({
+        success: false,
+        alreadyAdded:
+          true,
+
+        message:
+          "Fees already added for this month",
+      });
+    }
+
+    // Update existing
+    if (
+      existingFee
+    ) {
+      await Fees.findByIdAndUpdate(
+        existingFee._id,
+        {
+          amountPaid,
+          totalFees,
+          remainingAmount,
+          paymentStatus,
+        }
+      );
+
+      return Response.json({
+        success: true,
+        message:
+          "Fees updated successfully",
+      });
+    }
+
+    // Create new
     await Fees.create({
       studentId,
       month,
@@ -102,6 +127,8 @@ export async function POST(
         "Fees added successfully",
     });
   } catch (error) {
+    console.log(error);
+
     return Response.json(
       {
         success: false,

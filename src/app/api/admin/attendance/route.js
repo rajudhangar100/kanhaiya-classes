@@ -2,14 +2,21 @@ import connectDB from "@/lib/mongodb";
 import Student from "@/models/Student";
 import Attendance from "@/models/Attendance";
 
-export async function POST(request) {
+export async function POST(
+  request
+) {
   try {
     await connectDB();
 
-    const { standard, attendance } =
+    const {
+      standard,
+      attendance,
+      forceUpdate,
+    } =
       await request.json();
 
-    const today = new Date();
+    const today =
+      new Date();
 
     today.setHours(
       0,
@@ -18,47 +25,83 @@ export async function POST(request) {
       0
     );
 
-    // Prevent duplicate marking
-    const alreadyMarked =
-      await Attendance.findOne({
+    // Check existing attendance
+    const existingAttendance =
+      await Attendance.find({
         standard,
         date: today,
       });
 
-    if (alreadyMarked) {
+    // Already marked
+    if (
+      existingAttendance.length >
+        0 &&
+      !forceUpdate
+    ) {
       return Response.json(
         {
           success: false,
+          alreadyMarked:
+            true,
+
           message:
             "Attendance already marked for today",
+
+          attendance:
+            existingAttendance,
         },
         {
-          status: 400,
+          status: 200,
         }
       );
     }
 
-    // Save attendance
-    const attendanceDocs =
-      attendance.map(
-        (item) => ({
-          studentId:
-            item.studentId,
+    // Update mode
+    if (
+      existingAttendance.length >
+      0
+    ) {
+      for (const item of attendance) {
+        await Attendance.findOneAndUpdate(
+          {
+            studentId:
+              item.studentId,
 
-          standard,
+            standard,
 
-          status:
-            item.status,
+            date: today,
+          },
+          {
+            status:
+              item.status,
+          }
+        );
+      }
+    } else {
+      // First save
+      const attendanceDocs =
+        attendance.map(
+          (
+            item
+          ) => ({
+            studentId:
+              item.studentId,
 
-          date: today,
-        })
+            standard,
+
+            status:
+              item.status,
+
+            date: today,
+          })
+        );
+
+      await Attendance.insertMany(
+        attendanceDocs
       );
+    }
 
-    await Attendance.insertMany(
-      attendanceDocs
-    );
-
-    // Update attendance %
+    // Update percentages
     for (const item of attendance) {
       const totalClasses =
         await Attendance.countDocuments(
@@ -99,10 +142,18 @@ export async function POST(request) {
 
     return Response.json({
       success: true,
+
       message:
-        "Attendance marked successfully",
+        existingAttendance.length >
+        0
+          ? "Attendance updated successfully"
+          : "Attendance marked successfully",
     });
   } catch (error) {
+    console.log(
+      error
+    );
+
     return Response.json(
       {
         success: false,

@@ -105,7 +105,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-10">
+      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-10">
 
         <div className="bg-white rounded-[30px] p-6 shadow-md">
           <h3 className="text-gray-500">
@@ -136,7 +136,7 @@ export default function Dashboard() {
             ₹0
           </h2>
         </div>
-      </div>
+      </div> */}
       <div className="space-y-8">
           <PendingStudents />
           <FadeIn>

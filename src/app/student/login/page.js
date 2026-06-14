@@ -37,107 +37,271 @@ export default function StudentLogin() {
     setLoading] =
     useState(false);
 
-  useEffect(() => {
-    if (
-      typeof window !==
-      "undefined" &&
-      !window.recaptchaVerifier
-    ) {
+  // useEffect(() => {
+  //   if (
+  //     typeof window !==
+  //     "undefined" &&
+  //     !window.recaptchaVerifier
+  //   ) {
+  //     try {
+  //       if (window.recaptchaVerifier) {
+  //         window.recaptchaVerifier.clear();
+  //       }
+
+  //       window.recaptchaVerifier =
+  //         new RecaptchaVerifier(
+  //           auth,
+  //           "recaptcha-container",
+  //           {
+  //             size: "normal",
+  //           }
+  //       );
+
+  //       window.recaptchaVerifier.render();
+  //     } catch (error) {
+  //       console.error(
+  //         "Recaptcha init error:",
+  //         error
+  //       );
+  //     }
+  //   }
+  // }, []);
+
+  //New UseEffect: 
+//   // useEffect(() => {
+//   // if (typeof window === "undefined") return;
+
+//   // const initializeRecaptcha = async () => {
+//   //   try {
+//   //     // Prevent duplicate initialization
+//   //     if (!window.recaptchaVerifier) {
+//   //       window.recaptchaVerifier =
+//   //         new RecaptchaVerifier(
+//   //           auth,
+//   //           "recaptcha-container",
+//   //           {
+//   //             size: "normal",
+//   //             callback: () => {
+//   //               console.log(
+//   //                 "reCAPTCHA solved"
+//   //               );
+//   //             },
+//   //           }
+//   //         );
+
+//   //       await window.recaptchaVerifier.render();
+//   //     }
+//   //   } catch (error) {
+//   //     console.error(
+//   //       "Recaptcha init error: ",
+//   //       error
+//   //     );
+//   //   }
+//   // };
+
+//   initializeRecaptcha();
+// }, []);
+
+useEffect(() => {
+  if (
+    typeof window ===
+    "undefined"
+  )
+    return;
+
+  const initializeRecaptcha =
+    async () => {
       try {
-        if (window.recaptchaVerifier) {
-          window.recaptchaVerifier.clear();
+        if (
+          !window
+            .recaptchaVerifier
+        ) {
+          window.recaptchaVerifier =
+            new RecaptchaVerifier(
+              auth,
+              "recaptcha-container",
+              {
+                size:
+                  "invisible",
+                callback:
+                  () => {
+                    console.log(
+                      "reCAPTCHA solved"
+                    );
+                  },
+              }
+            );
+
+          await window.recaptchaVerifier.render();
         }
-
-        window.recaptchaVerifier =
-          new RecaptchaVerifier(
-            auth,
-            "recaptcha-container",
-            {
-              size: "normal",
-            }
-        );
-
-        window.recaptchaVerifier.render();
       } catch (error) {
         console.error(
           "Recaptcha init error:",
           error
         );
       }
-    }
-  }, []);
-
-  const sendOtp =
-    async () => {
-      try {
-        setLoading(true);
-
-        const appVerifier =
-          window.recaptchaVerifier;
-        const response =
-        await fetch(
-          "/api/student/login",
-          {
-            method:
-              "POST",
-          
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-          
-            body:
-              JSON.stringify(
-                {
-                  mobileNumber:
-                    mobile,
-                }
-              ),
-          }
-        );
-      
-      const data =
-        await response.json();
-      
-      if (!data.success) {
-        alert(
-          data.message
-        );
-      
-        setLoading(
-          false
-        );
-      
-        return;
-      }
-
-        const result =
-          await signInWithPhoneNumber(
-            auth,
-            `+91${mobile}`,
-            appVerifier
-          );
-
-        setConfirmationResult(
-          result
-        );
-
-        alert(
-          "OTP sent successfully"
-        );
-      } catch (error) {
-        console.error(
-          "Send OTP Error:",
-          error
-        );
-
-        alert(
-          `${error.code}\n${error.message}`
-        );
-      }
-
-      setLoading(false);
     };
+
+  initializeRecaptcha();
+}, []);
+
+  // const sendOtp =
+  //   async () => {
+  //     try {
+  //       setLoading(true);
+
+  //       const appVerifier =
+  //         window.recaptchaVerifier;
+  //       const response =
+  //       await fetch(
+  //         "/api/student/login",
+  //         {
+  //           method:
+  //             "POST",
+          
+  //           headers: {
+  //             "Content-Type":
+  //               "application/json",
+  //           },
+          
+  //           body:
+  //             JSON.stringify(
+  //               {
+  //                 mobileNumber:
+  //                   mobile,
+  //               }
+  //             ),
+  //         }
+  //       );
+      
+  //     const data =
+  //       await response.json();
+      
+  //     if (!data.success) {
+  //       alert(
+  //         data.message
+  //       );
+      
+  //       setLoading(
+  //         false
+  //       );
+      
+  //       return;
+  //     }
+
+  //       const result =
+  //         await signInWithPhoneNumber(
+  //           auth,
+  //           `+91${mobile}`,
+  //           appVerifier
+  //         );
+
+  //       setConfirmationResult(
+  //         result
+  //       );
+
+  //       alert(
+  //         "OTP sent successfully"
+  //       );
+  //     } catch (error) {
+  //       console.error(
+  //         "Send OTP Error:",
+  //         error
+  //       );
+
+  //       alert(
+  //         `${error.code}\n${error.message}`
+  //       );
+  //     }
+
+  //     setLoading(false);
+  //   };
+
+ const sendOtp = async () => {
+  try {
+    setLoading(true);
+
+    if (mobile.length !== 10) {
+      alert(
+        "Enter valid mobile number"
+      );
+      return;
+    }
+
+    const response =
+      await fetch(
+        "/api/student/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            mobileNumber:
+              mobile,
+          }),
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      alert(data.message);
+      return;
+    }
+
+    // if (
+    //   !window.recaptchaVerifier
+    // ) {
+    //   throw new Error(
+    //     "reCAPTCHA not initialized"
+    //   );
+    // }
+    if (!window.recaptchaVerifier) {
+  window.recaptchaVerifier =
+    new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "invisible",
+      }
+    );
+}
+    const appVerifier =
+      window.recaptchaVerifier;
+
+
+
+    const result =
+      await signInWithPhoneNumber(
+        auth,
+        `+91${mobile}`,
+        appVerifier
+      );
+
+    setConfirmationResult(
+      result
+    );
+
+    alert(
+      "OTP sent successfully"
+    );
+  } catch (error) {
+    console.error(
+      "Send OTP Error:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Failed to send OTP"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const verifyOtp =
     async () => {
@@ -231,9 +395,16 @@ export default function StudentLogin() {
 
           {!confirmationResult ? (
             <>
-              <div
+              {/* <div
                 id="recaptcha-container"
                 className="flex justify-center"
+              /> */}
+
+              <div
+                id="recaptcha-container"
+                style={{
+                  display: "none",
+                }}
               />
 
               <button

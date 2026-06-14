@@ -75,21 +75,21 @@ export default function Footer() {
               <div className="flex gap-3">
                 <Phone size={18} />
                 <span>
-                  +91 9876543210
+                  +91 63666 45045
                 </span>
               </div>
 
               <div className="flex gap-3">
                 <Mail size={18} />
                 <span>
-                  info@kanhaiyaclasses.com
+                  dhangarraju2005@gmail.com
                 </span>
               </div>
 
               <div className="flex gap-3">
                 <MapPin size={18} />
                 <span>
-                  Chennai, Tamil Nadu
+                  Mumbai, Maharashtra
                 </span>
               </div>
             </div>

@@ -2,10 +2,10 @@
 
 export default function AchievementBanner() {
   const items = [
-    "500+ Students Trained",
+    "50+ Students Trained",
     "98% Success Rate",
-    "12+ Years Experience",
-    "1000+ Tests Conducted",
+    "2+ Years Experience",
+    "100+ Tests Conducted",
     "Expert Guidance",
     "Personal Attention",
   ];

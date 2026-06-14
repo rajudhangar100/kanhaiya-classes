@@ -1,25 +1,29 @@
 "use client";
 
-import {
-  useState,
-} from "react";
+import { useState } from "react";
 
 export default function AttendanceManagement() {
-  const [standard,
-    setStandard] =
+  const [standard, setStandard] =
     useState("");
 
-  const [students,
-    setStudents] =
+  const [students, setStudents] =
     useState([]);
 
-  const [loading,
-    setLoading] =
+  const [loading, setLoading] =
     useState(false);
 
-  const [saving,
-    setSaving] =
+  const [saving, setSaving] =
     useState(false);
+
+  const [
+    alreadyMarked,
+    setAlreadyMarked,
+  ] = useState(false);
+
+  const [
+    allowUpdate,
+    setAllowUpdate,
+  ] = useState(false);
 
   const fetchStudents =
     async (
@@ -28,16 +32,18 @@ export default function AttendanceManagement() {
       try {
         setLoading(true);
 
+        setAlreadyMarked(
+          false
+        );
+
+        setAllowUpdate(
+          false
+        );
+
         const response =
           await fetch(
             `/api/admin/students-by-standard?standard=${selectedStandard}`
           );
-
-        if (!response.ok) {
-          throw new Error(
-            "Failed request"
-          );
-        }
 
         const data =
           await response.json();
@@ -61,7 +67,9 @@ export default function AttendanceManagement() {
           );
         }
       } catch (error) {
-        console.log(error);
+        console.log(
+          error
+        );
       }
 
       setLoading(false);
@@ -89,23 +97,30 @@ export default function AttendanceManagement() {
     };
 
   const saveAttendance =
-    async () => {
-      try {
-        setSaving(true);
+  async (
+    forceUpdate = false
+  ) => {
+    try {
+      setSaving(true);
 
-        const response =
-          await fetch(
-            "/api/admin/attendance",
-            {
-              method:
-                "POST",
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-              body: JSON.stringify(
+      const response =
+        await fetch(
+          "/api/admin/attendance",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify(
                 {
                   standard,
+
+                  forceUpdate,
+
                   attendance:
                     students.map(
                       (
@@ -120,30 +135,49 @@ export default function AttendanceManagement() {
                     ),
                 }
               ),
-            }
-          );
-        if (!response.ok) {
-          throw new Error(
-            "Failed request"
-          );
-        }
+          }
+        );
 
-        const data =
-          await response.json();
+      const data =
+        await response.json();
+
+      // Already marked
+      if (
+        data.alreadyMarked
+      ) {
+        setAlreadyMarked(
+          true
+        );
 
         alert(
           data.message
         );
-      } catch (error) {
-        console.log(error);
+
+        return;
       }
 
-      setSaving(false);
-    };
+      alert(
+        data.message
+      );
 
+      setAlreadyMarked(
+        false
+      );
+
+      setAllowUpdate(
+        false
+      );
+    } catch (error) {
+      console.log(
+        error
+      );
+    } finally {
+      // THIS FIXES THE ISSUE
+      setSaving(false);
+    }
+  };
   return (
     <div className="bg-white rounded-[35px] shadow-lg p-8 mt-10">
-
       <h2 className="heading-font text-3xl font-bold text-[#163232] mb-6">
         Attendance Management
       </h2>
@@ -169,9 +203,9 @@ export default function AttendanceManagement() {
           (_, i) => (
             <option
               key={i}
-              value={
-                String(i + 1)
-              }
+              value={String(
+                i + 1
+              )}
             >
               Std {i + 1}
             </option>
@@ -179,15 +213,44 @@ export default function AttendanceManagement() {
         )}
       </select>
 
+      {alreadyMarked && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-4 rounded-2xl mb-5 flex justify-between items-center">
+          <span>
+            Attendance already
+            marked for today
+          </span>
+
+          {!allowUpdate ? (
+            <button
+              onClick={() =>
+                setAllowUpdate(
+                  true
+                )
+              }
+              className="bg-orange-500 text-white px-5 py-2 rounded-xl"
+            >
+              Update
+              Attendance
+            </button>
+          ) : (
+            <span className="font-semibold text-green-700">
+              Update Mode
+              Enabled
+            </span>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <p>
           Loading students...
         </p>
       ) : (
         <div className="space-y-5">
-
           {students.map(
-            (student) => (
+            (
+              student
+            ) => (
               <div
                 key={
                   student._id
@@ -202,8 +265,7 @@ export default function AttendanceManagement() {
                   </h3>
 
                   <p className="text-gray-500">
-                    ID:
-                    {" "}
+                    ID:{" "}
                     {
                       student.studentId
                     }
@@ -211,8 +273,11 @@ export default function AttendanceManagement() {
                 </div>
 
                 <div className="flex gap-3">
-
                   <button
+                    disabled={
+                      alreadyMarked &&
+                      !allowUpdate
+                    }
                     onClick={() =>
                       handleStatus(
                         student._id,
@@ -230,6 +295,10 @@ export default function AttendanceManagement() {
                   </button>
 
                   <button
+                    disabled={
+                      alreadyMarked &&
+                      !allowUpdate
+                    }
                     onClick={() =>
                       handleStatus(
                         student._id,
@@ -253,16 +322,22 @@ export default function AttendanceManagement() {
           {students.length >
             0 && (
             <button
-              onClick={
-                saveAttendance
+              onClick={() =>
+                saveAttendance(
+                  allowUpdate
+                )
               }
               disabled={
-                saving
+                saving ||
+                (alreadyMarked &&
+                  !allowUpdate)
               }
-              className="w-full bg-linear-to-r from-[#3ED6C1] to-[#2CB5A0] text-white py-4 rounded-2xl font-semibold mt-5"
+              className="w-full bg-linear-to-r from-[#3ED6C1] to-[#2CB5A0] text-white py-4 rounded-2xl font-semibold mt-5 disabled:opacity-50"
             >
               {saving
                 ? "Saving..."
+                : allowUpdate
+                ? "Update Attendance"
                 : "Save Attendance"}
             </button>
           )}

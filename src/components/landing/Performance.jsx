@@ -3,19 +3,19 @@ import SectionHeading from "../common/SectionHeading";
 
 const toppers = [
   {
-    name: "Rahul Sharma",
-    score: "96%",
-    standard: "10th Standard",
+    name: "Vijaylaxmi Dhangar",
+    score: "79%",
+    standard: "8th Standard",
   },
   {
-    name: "Priya Verma",
-    score: "94%",
+    name: "Govind Dhangar",
+    score: "69%",
     standard: "12th Commerce",
   },
   {
-    name: "Aryan Gupta",
-    score: "92%",
-    standard: "9th Standard",
+    name: "Rakesh Dhangar",
+    score: "60%",
+    standard: "12th Commerce",
   },
 ];
 
